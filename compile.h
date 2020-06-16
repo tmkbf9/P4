@@ -2,7 +2,7 @@
 #define __COMPILE_H__
 
 #include <iosfwd>
-
+#include <vector>
 class Node;
 
 class Compile {
@@ -10,7 +10,10 @@ class Compile {
   Compile();
 
   void compile(Node * rootNode, std::ostream & os);
+  void traversePreOrder(Node* rootNode, std::ostream& os, int depth);
 
+  //private
+  std::vector<token> printTable;
 };
 
 #endif
