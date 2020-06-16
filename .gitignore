@@ -1,0 +1,8 @@
+P3
+test
+*.o
+*.a
+*~
+static_semantics_test
+
+statSem
