@@ -8,7 +8,7 @@ class Node;
 
 class StaticSemantics {
 public:
-    void semantics(Node* rootNode, std::ostream& os);
+    Node * semantics(Node* rootNode, std::ostream& os);
     void traversePreOrder(Node* rootNode, std::ostream& os, int depth);
     bool insertSymbol(token & tk);
     bool verify(token& tk);

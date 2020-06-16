@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void StaticSemantics::semantics(Node* rootNode, std::ostream& os) {
+Node * StaticSemantics::semantics(Node* rootNode, std::ostream& os) {
     redefiningVariableError = false;
     undefinedVariableError = false;
 
@@ -20,7 +20,8 @@ void StaticSemantics::semantics(Node* rootNode, std::ostream& os) {
         traversePreOrder(rootNode, os, 0);
         printSymbolTable(errTk, os);
     }
-    
+
+    return rootNode;
 }
 
 void StaticSemantics::traversePreOrder(Node* rootNode, ostream& os, int depth) {

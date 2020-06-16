@@ -17,14 +17,14 @@ compile: P4.o libcompilersteps.a
 libcompilersteps.a: available_tokens.o parser.o scanner.o static_semantics.o token.o
 	$(AR) rcs $@ $^
 
-test: 
-	echo "build me!"
+test: compile_test
+	./compile_test
 
-#static_semantics_test: static_semantics_test.o static_semantics.o libparser.a 
-#	$(GCC) -o $@ $^
+compile_test: compile_test.o compile.o libcompilersteps.a
+	$(GCC) -o $@ $^
 
 clean:
-	$(RM) -f compile
+	$(RM) -f compile compile_test
 	$(RM) -f libcompilersteps.a
 	$(RM) -f *.o
 	$(RM) -f *~
