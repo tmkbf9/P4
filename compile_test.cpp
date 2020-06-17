@@ -55,6 +55,23 @@ void test_two_ID_variables() {
     assert(os.str() == assembly);
 }
 
+void test_writing_constant() {
+    istringstream is("program begin write 5,# end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+
+    string assembly = "READ foo\nREAD foot\nSTOP\nfoo 0\nfoot 0\n";
+    assert(os.str() == assembly);
+}
+
+
+
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();

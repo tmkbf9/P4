@@ -13,7 +13,7 @@ class Compile {
   void traversePreOrder(Node* rootNode, std::ostream& os, int depth);
 
   //private
-  std::vector<token> printTable;
+  std::vector<token> symbolTable;
 };
 
 #endif

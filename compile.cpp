@@ -14,8 +14,8 @@ void Compile::compile(Node * rootNode, ostream & os) {
 
     traversePreOrder(rootNode, os, 0);
     os << "STOP" << endl;
-    for (int i = 0; i < printTable.size(); i++) {
-        os << printTable[i].tokenLiteral << " 0" << endl;
+    for (int i = 0; i < symbolTable.size(); i++) {
+        os << symbolTable[i].tokenLiteral << " 0" << endl;
     }
 }
 
@@ -24,7 +24,7 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
 
     if (rootNode->nodeName == "<V>") {
         os << "READ " << rootNode->subTrees[1]->tk.tokenLiteral << endl;
-        printTable.push_back(rootNode->subTrees[1]->tk);
+        symbolTable.push_back(rootNode->subTrees[1]->tk);
     }
 
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
