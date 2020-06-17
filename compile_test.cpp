@@ -36,7 +36,7 @@ void test_single_variable() {
     
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "READ foo\nSTOP\nfoo 0\n";
+    string assembly = "STOP\nfoo 0\n";
     assert(os.str() == assembly);
 }
 
@@ -51,12 +51,12 @@ void test_two_ID_variables() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "READ foo\nREAD foot\nSTOP\nfoo 0\nfoot 0\n";
+    string assembly = "STOP\nfoo 0\nfoot 0\n";
     assert(os.str() == assembly);
 }
 
 void test_writing_constant() {
-    istringstream is("program begin write 5,# end");
+    istringstream is("program begin var id1 . write id1 , # end");
     ostringstream os;
     Scanner scanner(is, cerr);
     Parser parser;
@@ -66,16 +66,45 @@ void test_writing_constant() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "READ foo\nREAD foot\nSTOP\nfoo 0\nfoot 0\n";
+    string assembly = "WRITE id1 STOP\nid1 0\n";
+    assert(os.str() == assembly);
+}
+void test_reading_identifier() {
+    istringstream is("program begin var id1 . scan id1 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    string assembly = "READ id1\nSTOP\nid1 0\n";
     assert(os.str() == assembly);
 }
 
+void test_reading_number() {
+    istringstream is("program begin scan 5 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
 
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+
+    string assembly = "READ 5\nSTOP\nT0 5\n";
+    assert(os.str() == assembly);
+}
 
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();
   test_two_ID_variables();
+  //test_writing_constant();
+  test_reading_identifier();
+  test_reading_number();
 
   return 0;
 }

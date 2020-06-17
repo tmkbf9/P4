@@ -18,7 +18,7 @@ Node * StaticSemantics::semantics(Node* rootNode, std::ostream& os) {
     }
     else {
         traversePreOrder(rootNode, os, 0);
-        printSymbolTable(errTk, os);
+        //printSymbolTable(errTk, os);
     }
 
     return rootNode;
