@@ -98,6 +98,21 @@ void test_reading_number() {
     assert(os.str() == assembly);
 }
 
+void test_reading_two_numbers() {
+    istringstream is("program begin scan 5 , # scan 10 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+
+    string assembly = "READ 5\nREAD 10\nSTOP\nT0 5\nT1 10\n";
+    assert(os.str() == assembly);
+}
+
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();
@@ -105,6 +120,7 @@ int main(int argc, char ** argv) {
   //test_writing_constant();
   test_reading_identifier();
   test_reading_number();
+  test_reading_two_numbers();
 
   return 0;
 }

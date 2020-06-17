@@ -14,7 +14,9 @@ void Compile::compile(Node* rootNode, ostream& os) {
     int tCount = 0;
 
     traversePreOrder(rootNode, os, 0);
+
     os << "STOP" << endl;
+
     for (int i = 0; i < symbolTable.size(); i++) {
         if (symbolTable[i].tokenID == "IDTK") {
             os << symbolTable[i].tokenLiteral << " 0" << endl;
