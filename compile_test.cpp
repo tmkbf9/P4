@@ -67,7 +67,7 @@ void test_writing_constant() {
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
     string assembly = "WRITE id1 STOP\nid1 0\n";
-    assert(os.str() == assembly);
+    assert(os.str() == assembly);   
 }
 void test_reading_identifier() {
     istringstream is("program begin var id1 . scan id1 , # end");
