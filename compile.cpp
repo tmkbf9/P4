@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "node.h"
@@ -8,11 +9,7 @@
 
 using namespace std;
 
-Compile::Compile() {}
-
 void Compile::compile(Node* rootNode, ostream& os) {
-    int tCount = 0;
-
     traversePreOrder(rootNode, os, 0);
 
     os << "STOP" << endl;
@@ -20,10 +17,6 @@ void Compile::compile(Node* rootNode, ostream& os) {
     for (int i = 0; i < symbolTable.size(); i++) {
         if (symbolTable[i].tokenID == "IDTK") {
             os << symbolTable[i].tokenLiteral << " 0" << endl;
-        }
-        else if (symbolTable[i].tokenID == "NUMTK") {
-            os << "T" << tCount << " " << symbolTable[i].tokenLiteral << endl;
-            tCount++;
         }
     }
 }
@@ -34,34 +27,46 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     if (rootNode->nodeName == "<V>") {
         symbolTable.push_back(rootNode->subTrees[1]->tk);
     }
-    if (rootNode->nodeName == "<W>") {
+    else if (rootNode->nodeName == "<W>") {
         os << "WRITE ";
     }
-    if (rootNode->nodeName == "<E>") {
+    else if (rootNode->nodeName == "<E>") {
         os << "STORE ";
     }
-    if (rootNode->nodeName == "<A>") {
+    else if (rootNode->nodeName == "<A>") {
         os << "READ ";
     
         if (rootNode->subTrees[1]->tk.tokenID == "IDTK") {
             os << rootNode->subTrees[1]->tk.tokenLiteral << endl;
         }
         else if(rootNode->subTrees[1]->tk.tokenID == "NUMTK") {
-            os << rootNode->subTrees[1]->tk.tokenLiteral << endl;
-            symbolTable.push_back(rootNode->subTrees[1]->tk);
+	  token token = token::ID_Token(createTemporaryVariable(), rootNode->subTrees[1]->tk.linenumber);
+	  symbolTable.push_back(token);
+
+	  os << token.tokenLiteral << endl;
         }
     }
-    if(rootNode->nodeName == "<R>") {
+    else if(rootNode->nodeName == "<R>") {
         if (rootNode->subTrees[0]->tk.tokenID == "IDTK") {
             os << rootNode->subTrees[0]->tk.tokenLiteral << endl;
         }
-        // else if(rootNode->subTrees[1]->tk.tokenID == "NUMTK") {
-        //     os << rootNode->subTrees[1]->tk.tokenLiteral << endl;
-        //     symbolTable.push_back(rootNode->subTrees[1]->tk);
-        // }
+        if(rootNode->subTrees[0]->tk.tokenID == "NUMTK") {
+	  token token = token::ID_Token(createTemporaryVariable(), rootNode->subTrees[0]->tk.linenumber);
+	  symbolTable.push_back(token);
+
+	  os << token.tokenLiteral << endl;
+        }
     }
 
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
         traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);
     }
+}
+
+string Compile::createTemporaryVariable() {
+  ostringstream os;
+
+  os << "T" << tempVariableCount++;
+
+  return os.str();
 }
