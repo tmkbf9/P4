@@ -51,6 +51,15 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
             symbolTable.push_back(rootNode->subTrees[1]->tk);
         }
     }
+    if(rootNode->nodeName == "<R>") {
+        if (rootNode->subTrees[0]->tk.tokenID == "IDTK") {
+            os << rootNode->subTrees[0]->tk.tokenLiteral << endl;
+        }
+        // else if(rootNode->subTrees[1]->tk.tokenID == "NUMTK") {
+        //     os << rootNode->subTrees[1]->tk.tokenLiteral << endl;
+        //     symbolTable.push_back(rootNode->subTrees[1]->tk);
+        // }
+    }
 
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
         traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);

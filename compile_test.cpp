@@ -55,7 +55,7 @@ void test_two_ID_variables() {
     assert(os.str() == assembly);
 }
 
-void test_writing_constant() {
+void test_writing_variable() {
     istringstream is("program begin var id1 . write id1 , # end");
     ostringstream os;
     Scanner scanner(is, cerr);
@@ -66,7 +66,7 @@ void test_writing_constant() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "WRITE id1 STOP\nid1 0\n";
+    string assembly = "WRITE id1\nSTOP\nid1 0\n";
     assert(os.str() == assembly);
 }
 void test_reading_identifier() {
@@ -117,7 +117,7 @@ int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();
   test_two_ID_variables();
-  //test_writing_constant();
+  test_writing_variable();
   test_reading_identifier();
   test_reading_number();
   test_reading_two_numbers();
