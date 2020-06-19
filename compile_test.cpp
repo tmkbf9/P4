@@ -55,7 +55,7 @@ void test_two_ID_variables() {
     assert(os.str() == assembly);
 }
 
-void test_writing_constant() {
+void test_writing_variable() {
     istringstream is("program begin var id1 . write id1 , # end");
     ostringstream os;
     Scanner scanner(is, cerr);
@@ -66,9 +66,25 @@ void test_writing_constant() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "WRITE id1 STOP\nid1 0\n";
-    assert(os.str() == assembly);   
+    string assembly = "WRITE id1\nSTOP\nid1 0\n";
+    assert(os.str() == assembly);
 }
+
+void test_writing_constant() {
+    istringstream is("program begin write 76 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+
+    string assembly = "WRITE 76\nSTOP\n";
+    assert(os.str() == assembly);
+}
+
 void test_reading_identifier() {
     istringstream is("program begin var id1 . scan id1 , # end");
     ostringstream os;
@@ -94,7 +110,7 @@ void test_reading_number() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "READ 5\nSTOP\nT0 5\n";
+    string assembly = "READ T0\nSTOP\nT0 0\n";
     assert(os.str() == assembly);
 }
 
@@ -109,7 +125,7 @@ void test_reading_two_numbers() {
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
 
-    string assembly = "READ 5\nREAD 10\nSTOP\nT0 5\nT1 10\n";
+    string assembly = "READ T0\nREAD T1\nSTOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
 
@@ -117,7 +133,7 @@ int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();
   test_two_ID_variables();
-  //test_writing_constant();
+  test_writing_variable();
   test_reading_identifier();
   test_reading_number();
   test_reading_two_numbers();

@@ -3,17 +3,21 @@
 
 #include <iosfwd>
 #include <vector>
+#include <string>
+
 class Node;
 
 class Compile {
  public:
-  Compile();
+  Compile() : tempVariableCount(0) {}
 
   void compile(Node * rootNode, std::ostream & os);
   void traversePreOrder(Node* rootNode, std::ostream& os, int depth);
 
-  //private
+ private:
+  std::string createTemporaryVariable();
   std::vector<token> symbolTable;
+  int tempVariableCount;
 };
 
 #endif
