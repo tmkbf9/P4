@@ -128,6 +128,20 @@ void test_reading_two_numbers() {
     string assembly = "READ T0\nREAD T1\nSTOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
+void test_writing_two_constants_sperated_by_operator() {
+        istringstream is("program begin write 76 + 5 , # end");
+        ostringstream os;
+        Scanner scanner(is, cerr);
+        Parser parser;
+        Node* rootNode = NULL;
+        StaticSemantics sem;
+        Compile compiler;
+
+        compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+
+        string assembly = "LOAD 76\nADD 5\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
+        assert(os.str() == assembly);
+}
 
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
@@ -137,6 +151,7 @@ int main(int argc, char ** argv) {
   test_reading_identifier();
   test_reading_number();
   test_reading_two_numbers();
+  test_writing_two_constants_sperated_by_operator();
 
   return 0;
 }
