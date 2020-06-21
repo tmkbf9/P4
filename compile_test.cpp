@@ -138,9 +138,22 @@ void test_writing_two_constants_sperated_by_operator() {
         Compile compiler;
 
         compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
-
+        
         string assembly = "LOAD 76\nADD 5\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
         assert(os.str() == assembly);
+}
+void test_writing_three_constants_sperated_by_operators() {
+    istringstream is("program begin write 76 * 5 - 7 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    string assembly = "LOAD 76\nMULT 5\nSUB 7\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
+    assert(os.str() == assembly);
 }
 
 int main(int argc, char ** argv) {
@@ -148,10 +161,11 @@ int main(int argc, char ** argv) {
   test_single_variable();
   test_two_ID_variables();
   test_writing_variable();
+  test_writing_constant();
   test_reading_identifier();
   test_reading_number();
   test_reading_two_numbers();
   test_writing_two_constants_sperated_by_operator();
-
+  test_writing_three_constants_sperated_by_operators();
   return 0;
 }

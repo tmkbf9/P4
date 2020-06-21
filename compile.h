@@ -17,6 +17,7 @@ class Compile {
  private:
   std::string createTemporaryVariable();
   std::string processHRnodes(token& tk, bool ampersandFlag);
+  std::string processMNode(Node * rootNode, std::string output);
   std::vector<token> symbolTable;
   int tempVariableCount;
 };
