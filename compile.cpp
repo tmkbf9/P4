@@ -37,70 +37,42 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     if (rootNode->nodeName == "<V>") {
         symbolTable.push_back(rootNode->subTrees[1]->tk);
     }
-    else if (rootNode->nodeName == "<T>") {
-        os << processTNode(rootNode->subTrees[0], output);
+    else if (rootNode->nodeName == "<Q>") {
+        os << processQNode(rootNode, output);
     } 
-    //<I> if [ M Z M ] <T>
-    // if = br
-    //Z -> A > B means A - B > 0, A : B = true. A < B means A - B < 0, A = B means A-B = 0
-    //resolve M_left to M0 and M_right to M1 then eval M0 - M1, then compare using Z 
-    else if (rootNode->nodeName == "<I>") {
-        int leftMNode, rightMNode;
-        os << "LOAD " << processMNode(rootNode->subTrees[2], output);
-        token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
-        symbolTable.push_back(tokenLeft);
-        leftMNode = tempVariableCount - 1;
-        os << "STORE T" << leftMNode << "\n";
-        
-        os << "LOAD " << processMNode(rootNode->subTrees[4], output);
-        token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
-        symbolTable.push_back(tokenRight);
-        rightMNode = tempVariableCount - 1;
-        os << "STORE T" << rightMNode << "\n";
-        
-        os << "LOAD T" << leftMNode << "\n";
-        os << "SUB T" << rightMNode << "\n";
-        os << "STORE T" << leftMNode << "\n";
-
-        //Create JUMPX where X is number of JUMPS
-        string gotoString = "GOTO" + IntToString(tempVariableCount++);
-        cout << gotoString << endl;
-        switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
-        case '=':
-            //???????
-            os << "BRZERO ";
-            break;
-        case ':':
-            //?????
-            break;
-        case '>':
-            os << "BRZNEG " << gotoString << endl;
-            break;
-        case '<':
-            os << "BRZPOS " << gotoString << endl;
-            break;
-        }
-
-        os << processTNode(rootNode->subTrees[6], output);
-
-        os << gotoString << ": ";
-        
-    }
+   
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
         traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);
     }
 }
+string Compile::processQNode(Node* rootNode, string output) {
+    output += processTNode(rootNode->subTrees[0]->subTrees[0], output);
+
+    return output;
+}
 string Compile::processTNode(Node* rootNode, string output) {
-    if (rootNode->nodeName == "<W>") {
+    
+if (rootNode->nodeName == "<W>") {
         output += processWNode(rootNode, output);
     }
     else if (rootNode->nodeName == "<E>") {
         output += "STORE " + processMNode(rootNode->subTrees[3], output);
     }
     else if (rootNode->nodeName == "<A>") {
-        output += processANode(rootNode, output);
+        output = processANode(rootNode, output);
     }
-    //need I and G nodes!
+    else if (rootNode->nodeName == "<I>") {
+        
+        string gotoString = "GOTO" + IntToString(conditionalCount++);
+
+        output += processINode(rootNode, output, gotoString);
+
+        string tOutput = "";
+        output += processTNode(rootNode->subTrees[6]->subTrees[0], tOutput);
+
+        output += gotoString + ": ";
+    }
+    //need G nodes!
     return output;
 }
 string Compile::processANode(Node* rootNode, string output) {
@@ -130,6 +102,80 @@ string Compile::processWNode(Node* rootNode, string output) {
     else {
         output += "WRITE " + processMNode(rootNode->subTrees[1], output);
     }
+    return output;
+}
+string Compile::processINode(Node* rootNode, string output, string gotoString) {
+    string leftMNode, rightMNode;
+    output += "LOAD " + processMNode(rootNode->subTrees[2], output);
+    token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
+    symbolTable.push_back(tokenLeft);
+    leftMNode = IntToString(tempVariableCount - 1);
+    output += "STORE T" + leftMNode + "\n";
+
+    output += "LOAD " + processMNode(rootNode->subTrees[4], output);
+    token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
+    symbolTable.push_back(tokenRight);
+    rightMNode = IntToString(tempVariableCount - 1);
+    output += "STORE T" + rightMNode + "\n";
+
+    output += "LOAD T" + leftMNode + "\n";
+    output += "SUB T" + rightMNode + "\n";
+    //output += "STORE T" + leftMNode + "\n";
+
+    switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
+    case '=':
+        //???????
+        output += "BRPOS " + gotoString + "\n";
+        output += "BRNEG " + gotoString + "\n";
+        break;
+    case ':':
+        //always true so no break?
+        break;
+    case '>':
+        output += "BRZNEG " + gotoString + "\n";
+        break;
+    case '<':
+        output += "BRZPOS " + gotoString + "\n";
+        break;
+    }
+
+    return output;
+}
+string Compile::processGNode(Node* rootNode, string output, string gotoString) {
+    string leftMNode, rightMNode;
+    output += "LOAD " + processMNode(rootNode->subTrees[2], output);
+    token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
+    symbolTable.push_back(tokenLeft);
+    leftMNode = IntToString(tempVariableCount - 1);
+    output += "STORE T" + leftMNode + "\n";
+
+    output += "LOAD " + processMNode(rootNode->subTrees[4], output);
+    token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
+    symbolTable.push_back(tokenRight);
+    rightMNode = IntToString(tempVariableCount - 1);
+    output += "STORE T" + rightMNode + "\n";
+
+    output += "LOAD T" + leftMNode + "\n";
+    output += "SUB T" + rightMNode + "\n";
+    //output += "STORE T" + leftMNode + "\n";
+
+    switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
+    case '=':
+        //???????
+        output += "BRPOS " + gotoString + "\n";
+        output += "BRNEG " + gotoString + "\n";
+        break;
+    case ':':
+        //always true so no break?
+        break;
+    case '>':
+        output += "BRZNEG " + gotoString + "\n";
+        break;
+    case '<':
+        output += "BRZPOS " + gotoString + "\n";
+        break;
+    }
+
     return output;
 }
 string Compile::processMNode(Node* rootNode, string output ) {
