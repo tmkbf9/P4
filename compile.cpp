@@ -72,8 +72,22 @@ if (rootNode->nodeName == "<W>") {
 
         output += gotoString + ": ";
     }
-    //need G nodes!
-    return output;
+    else if (rootNode->nodeName == "<G>") {
+
+        string gotoString = "GOTO" + IntToString(conditionalCount);
+        string backString = "BACK" + IntToString(conditionalCount++);
+        output += backString + ": ";
+        string gOutput = "";
+        output += processGNode(rootNode, gOutput, gotoString);
+
+        string tOutput = "";
+        output += processTNode(rootNode->subTrees[6]->subTrees[0], tOutput);
+
+        output += "BR " + backString + "\n";
+        output += gotoString + ": ";
+
+}
+        return output;
 }
 string Compile::processANode(Node* rootNode, string output) {
     output += "READ ";
@@ -120,11 +134,9 @@ string Compile::processINode(Node* rootNode, string output, string gotoString) {
 
     output += "LOAD T" + leftMNode + "\n";
     output += "SUB T" + rightMNode + "\n";
-    //output += "STORE T" + leftMNode + "\n";
 
     switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
     case '=':
-        //???????
         output += "BRPOS " + gotoString + "\n";
         output += "BRNEG " + gotoString + "\n";
         break;
@@ -143,6 +155,7 @@ string Compile::processINode(Node* rootNode, string output, string gotoString) {
 }
 string Compile::processGNode(Node* rootNode, string output, string gotoString) {
     string leftMNode, rightMNode;
+    
     output += "LOAD " + processMNode(rootNode->subTrees[2], output);
     token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenLeft);

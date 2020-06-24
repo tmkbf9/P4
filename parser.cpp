@@ -407,7 +407,7 @@ Node* Parser::createVNode(AvailableTokens & availableTokens) {
  }
 
  Node* Parser::createGNode(AvailableTokens & availableTokens) {
-     Node* newNode = new Node("<I>");
+     Node* newNode = new Node("<G>");
      int nodeCount = 0;
 
      token currentToken = availableTokens.nextToken();
