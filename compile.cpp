@@ -56,8 +56,11 @@ if (rootNode->nodeName == "<W>") {
         output += processWNode(rootNode, output);
     }
     else if (rootNode->nodeName == "<E>") {
+    if (rootNode->subTrees[3]->subTrees[0]->tk.tokenID == "NUMTK") {
         output += "STORE " + processMNode(rootNode->subTrees[3], output);
     }
+    //else if()
+   }
     else if (rootNode->nodeName == "<A>") {
         output = processANode(rootNode, output);
     }
