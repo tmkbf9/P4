@@ -156,6 +156,21 @@ void test_writing_three_constants_sperated_by_operators() {
     assert(os.str() == assembly);
 }
 
+void test_if_with_two_numbers() {
+    istringstream is("program begin if [ 7 > 5 ] write 76 , , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    cout << os.str() << endl;
+    string assembly = "LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO2\nWRITE 76\nGOTO2: STOP\nT0 0\nT1 0\n";
+    assert(os.str() == assembly);
+}
+
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
   test_single_variable();
@@ -167,5 +182,7 @@ int main(int argc, char ** argv) {
   test_reading_two_numbers();
   test_writing_two_constants_sperated_by_operator();
   test_writing_three_constants_sperated_by_operators();
+  test_if_with_two_numbers();
+
   return 0;
 }

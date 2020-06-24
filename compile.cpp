@@ -63,24 +63,27 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
         os << "STORE T" << leftMNode << "\n";
 
         //Create JUMPX where X is number of JUMPS
-        
+        string gotoString = "GOTO" + IntToString(tempVariableCount++);
+        cout << gotoString << endl;
         switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
         case '=':
+            //???????
             os << "BRZERO ";
             break;
         case ':':
             //?????
             break;
         case '>':
-            os << "BRPOS ";
+            os << "BRZNEG " << gotoString << endl;
             break;
         case '<':
-            os << "BRNEG ";
+            os << "BRZPOS " << gotoString << endl;
             break;
         }
 
-        //processTNode()?
-        //
+        os << processTNode(rootNode->subTrees[6], output);
+
+        os << gotoString << ": ";
         
     }
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
@@ -171,6 +174,7 @@ string Compile::processHRnodes(token& tk, bool ampersandFlag) {
 
         //return token.tokenLiteral;
     }
+    return tk.tokenLiteral;
 }
 
 string Compile::createTemporaryVariable() {
