@@ -9,7 +9,14 @@
 
 using namespace std;
 
-
+namespace {
+    string IntToString(int a)
+    {
+        ostringstream temp;
+        temp << a;
+        return temp.str();
+    }
+}
 void Compile::compile(Node* rootNode, ostream& os) {
     traversePreOrder(rootNode, os, 0);
 
@@ -31,51 +38,13 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
         symbolTable.push_back(rootNode->subTrees[1]->tk);
     }
     else if (rootNode->nodeName == "<W>") {
-        if (rootNode->subTrees[1]->subTrees.size() > 1) {
-            os << "LOAD " << processMNode(rootNode->subTrees[1], output);
-            token token = token::ID_Token(createTemporaryVariable(), 0);
-            symbolTable.push_back(token);
-            os << "STORE T" << tempVariableCount - 1 << "\n";
-            os << "WRITE T" << tempVariableCount - 1 << "\n";
-            
-        }
-        else {
-            os << "WRITE " << processMNode(rootNode->subTrees[1], output);
-        }
+        os << processWNode(rootNode, output);
    }
-    /*else if (rootNode->nodeName == "<M>") {
-        bool ampFlag = false;
-        if (rootNode->subTrees.size() == 1) {
-            
-            if (rootNode->subTrees[0]->tk.tokenLiteral == "&") {
-                //do & math
-                //more if where rootNode->subTree[1]->subTrees0 == IDTK or NUMTK
-            }
-            else {
-                string hrNode = processHRnodes(rootNode->subTrees[0]->subTrees[0]->subTrees[0]->tk, ampFlag);
-                os <<  hrNode << endl;
-            }
-        }
-        else {
-            //processhRnodes(something)
-            //switch operator
-        }
-    }*/
     else if (rootNode->nodeName == "<E>") {
         os << "STORE " << processMNode(rootNode->subTrees[3], output);
     }
     else if (rootNode->nodeName == "<A>") {
-        os << "READ ";
-    
-        if (rootNode->subTrees[1]->tk.tokenID == "IDTK") {
-            os << rootNode->subTrees[1]->tk.tokenLiteral << endl;
-        }
-        else if(rootNode->subTrees[1]->tk.tokenID == "NUMTK") {
-	  token token = token::ID_Token(createTemporaryVariable(), rootNode->subTrees[1]->tk.linenumber);
-	  symbolTable.push_back(token);
-
-	  os << token.tokenLiteral << endl;
-        }
+        os << processANode(rootNode, output);
     }
     //<I> if [ M Z M ] <T>
     // if = br
@@ -83,15 +52,15 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     //resolve M_left to M0 and M_right to M1 then eval M0 - M1, then compare using Z 
     else if (rootNode->nodeName == "<I>") {
         int leftMNode, rightMNode;
-        os << "LOAD " << processMNode(rootNode->subTrees[3], output);
-        token token = token::ID_Token(createTemporaryVariable(), 0);
-        symbolTable.push_back(token);
+        os << "LOAD " << processMNode(rootNode->subTrees[2], output);
+        token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(tokenLeft);
         leftMNode = tempVariableCount - 1;
         os << "STORE T" << leftMNode << "\n";
         
-        os << "LOAD " << processMNode(rootNode->subTrees[3], output);
-        token = token::ID_Token(createTemporaryVariable(), 0);
-        symbolTable.push_back(token);
+        os << "LOAD " << processMNode(rootNode->subTrees[4], output);
+        token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(tokenRight);
         rightMNode = tempVariableCount - 1;
         os << "STORE T" << rightMNode << "\n";
         
@@ -99,15 +68,60 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
         os << "SUB T" << rightMNode << "\n";
         os << "STORE T" << leftMNode << "\n";
 
+        //Create JUMPX where X is number of JUMPS
+        
+        switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
+        case '=':
+            os << "BRZERO ";
+            break;
+        case ':':
+            //?????
+            break;
+        case '>':
+            os << "BRPOS ";
+            break;
+        case '<':
+            os << "BRNEG ";
+            break;
+        }
 
-        //compare to 0
-
+        //processTNode()?
+        //
+        
     }
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
         traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);
     }
 }
+string Compile::processANode(Node* rootNode, string output) {
+    output += "READ ";
 
+    if (rootNode->subTrees[1]->tk.tokenID == "IDTK") {
+         output += rootNode->subTrees[1]->tk.tokenLiteral  + "\n";
+    }
+    else if (rootNode->subTrees[1]->tk.tokenID == "NUMTK") {
+        token token = token::ID_Token(createTemporaryVariable(), rootNode->subTrees[1]->tk.linenumber);
+        symbolTable.push_back(token);
+
+        output += token.tokenLiteral + "\n";
+    }
+
+    return output;
+}
+string Compile::processWNode(Node* rootNode, string output) {
+    if (rootNode->subTrees[1]->subTrees.size() > 1) {
+        output += "LOAD " + processMNode(rootNode->subTrees[1], output);
+        token token = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(token);
+        output += "STORE T" + IntToString(tempVariableCount - 1) + "\n";
+        output += "WRITE T" + IntToString(tempVariableCount - 1) + "\n";
+
+    }
+    else {
+        output += "WRITE " + processMNode(rootNode->subTrees[1], output);
+    }
+    return output;
+}
 string Compile::processMNode(Node* rootNode, string output ) {
     bool ampFlag = false;
     if (rootNode->subTrees.size() == 1) {

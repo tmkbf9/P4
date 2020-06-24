@@ -16,6 +16,8 @@ class Compile {
 
  private:
   std::string createTemporaryVariable();
+  std::string processANode(Node* rootNode, std::string output);
+  std::string processWNode(Node* rootNode, std::string output);
   std::string processHRnodes(token& tk, bool ampersandFlag);
   std::string processMNode(Node * rootNode, std::string output);
   std::vector<token> symbolTable;
