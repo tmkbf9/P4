@@ -37,15 +37,9 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     if (rootNode->nodeName == "<V>") {
         symbolTable.push_back(rootNode->subTrees[1]->tk);
     }
-    else if (rootNode->nodeName == "<W>") {
-        os << processWNode(rootNode, output);
-   }
-    else if (rootNode->nodeName == "<E>") {
-        os << "STORE " << processMNode(rootNode->subTrees[3], output);
-    }
-    else if (rootNode->nodeName == "<A>") {
-        os << processANode(rootNode, output);
-    }
+    else if (rootNode->nodeName == "<T>") {
+        os << processTNode(rootNode->subTrees[0], output);
+    } 
     //<I> if [ M Z M ] <T>
     // if = br
     //Z -> A > B means A - B > 0, A : B = true. A < B means A - B < 0, A = B means A-B = 0
@@ -92,6 +86,19 @@ void Compile::traversePreOrder(Node* rootNode, ostream& os, int depth) {
     for (int subTreeIndex = 0; subTreeIndex < rootNode->subTrees.size(); subTreeIndex++) {
         traversePreOrder(rootNode->subTrees[subTreeIndex], os, depth + 1);
     }
+}
+string Compile::processTNode(Node* rootNode, string output) {
+    if (rootNode->nodeName == "<W>") {
+        output += processWNode(rootNode, output);
+    }
+    else if (rootNode->nodeName == "<E>") {
+        output += "STORE " + processMNode(rootNode->subTrees[3], output);
+    }
+    else if (rootNode->nodeName == "<A>") {
+        output += processANode(rootNode, output);
+    }
+    //need I and G nodes!
+    return output;
 }
 string Compile::processANode(Node* rootNode, string output) {
     output += "READ ";
