@@ -183,20 +183,7 @@ void test_repeat_with_two_numbers() {
     string assembly = "BACK1: LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nBR BACK1\nGOTO1: STOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
-void test_repeat_with_an_identifier() {
-    istringstream is("program begin var id1 . let id1 : 5 , # repeat [ id1 < 7 ] begin write id1 , # let id1 : id1 + 1 , # end  , # end");
-    ostringstream os;
-    Scanner scanner(is, cerr);
-    Parser parser;
-    Node* rootNode = NULL;
-    StaticSemantics sem;
-    Compile compiler;
 
-    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
-    cout << os.str() << endl;
-    string assembly = "BACK1: LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nBR BACK1\nGOTO1: STOP\nT0 0\nT1 0\n";
-    assert(os.str() == assembly);
-}
 
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
@@ -211,7 +198,6 @@ int main(int argc, char ** argv) {
   test_writing_three_constants_sperated_by_operators();
   test_if_with_two_numbers();
   test_repeat_with_two_numbers();
-  test_repeat_with_an_identifier();
 
   return 0;
 }

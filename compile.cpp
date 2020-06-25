@@ -55,12 +55,9 @@ string Compile::processTNode(Node* rootNode, string output) {
 if (rootNode->nodeName == "<W>") {
         output += processWNode(rootNode, output);
     }
-    else if (rootNode->nodeName == "<E>") {
-    if (rootNode->subTrees[3]->subTrees[0]->tk.tokenID == "NUMTK") {
-        output += "STORE " + processMNode(rootNode->subTrees[3], output);
-    }
-    //else if()
-   }
+else if (rootNode->nodeName == "<E>") {
+    output += "STORE " + processMNode(rootNode->subTrees[3], output);
+}
     else if (rootNode->nodeName == "<A>") {
         output = processANode(rootNode, output);
     }
@@ -134,23 +131,26 @@ string Compile::processINode(Node* rootNode, string output, string gotoString) {
     symbolTable.push_back(tokenRight);
     rightMNode = IntToString(tempVariableCount - 1);
     output += "STORE T" + rightMNode + "\n";
-
-    output += "LOAD T" + leftMNode + "\n";
-    output += "SUB T" + rightMNode + "\n";
-
+    if (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0] != ':') {
+        output += "LOAD T" + leftMNode + "\n";
+        output += "SUB T" + rightMNode + "\n";
+    }
+    else {
+        output += "LOAD T " + rightMNode + "\n";
+        output += "STORE T" + leftMNode + "\n";
+    }
     switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
     case '=':
         output += "BRPOS " + gotoString + "\n";
         output += "BRNEG " + gotoString + "\n";
-        break;
-    case ':':
-        //always true so no break?
         break;
     case '>':
         output += "BRZNEG " + gotoString + "\n";
         break;
     case '<':
         output += "BRZPOS " + gotoString + "\n";
+        break;
+    default:
         break;
     }
 
@@ -168,13 +168,17 @@ string Compile::processGNode(Node* rootNode, string output, string gotoString) {
     output += "LOAD " + processMNode(rootNode->subTrees[4], output);
     token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenRight);
-    rightMNode = IntToString(tempVariableCount - 1);
+    rightMNode = IntToString(tempVariableCount - 1);        
     output += "STORE T" + rightMNode + "\n";
 
-    output += "LOAD T" + leftMNode + "\n";
-    output += "SUB T" + rightMNode + "\n";
-    //output += "STORE T" + leftMNode + "\n";
-
+    if (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0] != ':') {
+        output += "LOAD T" + leftMNode + "\n";
+        output += "SUB T" + rightMNode + "\n";
+    }
+    else {
+        output += "LOAD T " + rightMNode + "\n";
+        output += "STORE T" + leftMNode + "\n";
+    }
     switch (rootNode->subTrees[3]->subTrees[0]->tk.tokenLiteral[0]) {
     case '=':
         //???????
@@ -189,6 +193,8 @@ string Compile::processGNode(Node* rootNode, string output, string gotoString) {
         break;
     case '<':
         output += "BRZPOS " + gotoString + "\n";
+        break;
+    default:
         break;
     }
 
