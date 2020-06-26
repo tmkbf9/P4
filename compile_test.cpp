@@ -183,7 +183,19 @@ void test_repeat_with_two_numbers() {
     string assembly = "BACK1: LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nBR BACK1\nGOTO1: STOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
+void test_writing_three_constants_sperated_by_operators() {
+    istringstream is("program begin write 76 * 5 - 7 , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
 
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    string assembly = "LOAD 76\nMULT 5\nSUB 7\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
+    assert(os.str() == assembly);
+}
 
 int main(int argc, char ** argv) {
   test_smallest_legal_program();
