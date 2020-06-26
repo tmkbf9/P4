@@ -70,7 +70,7 @@ else if (rootNode->nodeName == "<E>") {
         string tOutput = "";
         output += processTNode(rootNode->subTrees[6]->subTrees[0], tOutput);
 
-        output += gotoString + ": ";
+        output += gotoString + ": " ;
     }
     else if (rootNode->nodeName == "<G>") {
 

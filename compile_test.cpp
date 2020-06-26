@@ -216,8 +216,8 @@ void test_repeat_with_two_numbers() {
     string assembly = "BACK1: LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nBR BACK1\nGOTO1: STOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
-void test_writing_three_constants_sperated_by_operators() {
-    istringstream is("program begin write 76 * 5 - 7 , # end");
+void test_writing_if_with_single_Ms_seperated_by_comparison() {
+    istringstream is("program var id1 . begin if [ id1 > 5 ] write 76 , , # end");
     ostringstream os;
     Scanner scanner(is, cerr);
     Parser parser;
@@ -226,7 +226,52 @@ void test_writing_three_constants_sperated_by_operators() {
     Compile compiler;
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
-    string assembly = "LOAD 76\nMULT 5\nSUB 7\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
+  
+    string assembly = "LOAD id1\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nGOTO1: STOP\nid1 0\nT0 0\nT1 0\n";
+    assert(os.str() == assembly);
+}
+void test_writing_if_with_multiple_Ms_on_left_seperated_by_comparison() {
+    istringstream is("program var id1 . begin if [ id1 + 5 > 5 ] write 76 , , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+   
+    string assembly = "LOAD id1\nADD 5\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nGOTO1: STOP\nid1 0\nT0 0\nT1 0\n";
+    assert(os.str() == assembly);
+}
+
+void test_writing_if_with_multiple_Ms_on_right_seperated_by_comparison() {
+    istringstream is("program var id1 . begin if [ 5 > id1 + 5 ] write 76 , , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    cout << os.str() << endl;
+    string assembly = "LOAD 5\nSTORE T0\nLOAD id1\nADD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nGOTO1: STOP\nid1 0\nT0 0\nT1 0\n";
+    assert(os.str() == assembly);
+}
+void test_writing_if_with_nested_ifs() {
+    //p <V> if [5 > id1 + 5] if [ 5 < 7 ] write 76 , , , # end
+    istringstream is("program var id1 . begin if [ 5 > id1 + 5 ] if [ 5 < 7] write 76 , , , # end");
+    ostringstream os;
+    Scanner scanner(is, cerr);
+    Parser parser;
+    Node* rootNode = NULL;
+    StaticSemantics sem;
+    Compile compiler;
+
+    compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+    cout << os.str() << endl;
+    string assembly = "LOAD 5\nSTORE T0\nLOAD id1\nADD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nGOTO1: STOP\nid1 0\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
 
@@ -245,6 +290,12 @@ int main(int argc, char ** argv) {
   test_repeat_with_two_numbers();
   test_writing_identifier_and_number_sperated_by_operator();
   test_writing_two_identifiers_sperated_by_operator();
+  test_writing_if_with_single_Ms_seperated_by_comparison();
+  test_writing_if_with_multiple_Ms_on_left_seperated_by_comparison();
+  test_writing_if_with_multiple_Ms_on_right_seperated_by_comparison();
+  test_writing_if_with_nested_ifs();
+
+
 
   return 0;
 }
