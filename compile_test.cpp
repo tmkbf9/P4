@@ -128,6 +128,7 @@ void test_reading_two_numbers() {
     string assembly = "READ T0\nREAD T1\nSTOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
+
 void test_writing_two_constants_sperated_by_operator() {
         istringstream is("program begin write 76 + 5 , # end");
         ostringstream os;
@@ -142,6 +143,37 @@ void test_writing_two_constants_sperated_by_operator() {
         string assembly = "LOAD 76\nADD 5\nSTORE T0\nWRITE T0\nSTOP\nT0 0\n";
         assert(os.str() == assembly);
 }
+
+void test_writing_identifier_and_number_sperated_by_operator() {
+        istringstream is("program var foo . begin write foo + 5 , # end");
+        ostringstream os;
+        Scanner scanner(is, cerr);
+        Parser parser;
+        Node* rootNode = NULL;
+        StaticSemantics sem;
+        Compile compiler;
+
+        compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+        
+        string assembly = "LOAD foo\nADD 5\nSTORE T0\nWRITE T0\nSTOP\nfoo 0\nT0 0\n";
+        assert(os.str() == assembly);
+}
+
+void test_writing_two_identifiers_sperated_by_operator() {
+        istringstream is("program var foo . var bar . begin write foo + bar , # end");
+        ostringstream os;
+        Scanner scanner(is, cerr);
+        Parser parser;
+        Node* rootNode = NULL;
+        StaticSemantics sem;
+        Compile compiler;
+
+        compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
+        
+        string assembly = "LOAD foo\nADD bar\nSTORE T0\nWRITE T0\nSTOP\nfoo 0\nbar 0\nT0 0\n";
+        assert(os.str() == assembly);
+}
+
 void test_writing_three_constants_sperated_by_operators() {
     istringstream is("program begin write 76 * 5 - 7 , # end");
     ostringstream os;
@@ -170,6 +202,7 @@ void test_if_with_two_numbers() {
     string assembly = "LOAD 7\nSTORE T0\nLOAD 5\nSTORE T1\nLOAD T0\nSUB T1\nBRZNEG GOTO1\nWRITE 76\nGOTO1: STOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
+
 void test_repeat_with_two_numbers() {
     istringstream is("program begin repeat [ 7 > 5 ] write 76 , , # end");
     ostringstream os;
@@ -210,6 +243,8 @@ int main(int argc, char ** argv) {
   test_writing_three_constants_sperated_by_operators();
   test_if_with_two_numbers();
   test_repeat_with_two_numbers();
+  test_writing_identifier_and_number_sperated_by_operator();
+  test_writing_two_identifiers_sperated_by_operator();
 
   return 0;
 }

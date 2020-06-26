@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
         sem.semantics(rootNode, cout);
   }
   else {
-      cerr << "Two many command line parameters given. Aborting" << endl;
+      cerr << "Too many command line parameters given. Aborting" << endl;
       return 1;
   }
 
