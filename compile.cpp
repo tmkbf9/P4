@@ -56,7 +56,7 @@ if (rootNode->nodeName == "<W>") {
         output += processWNode(rootNode, output);
     }
 else if (rootNode->nodeName == "<E>") {
-    output += "STORE " + processMNode(rootNode->subTrees[3], output);
+    output += processMNode(rootNode->subTrees[3], output, "STORE ");
 }
     else if (rootNode->nodeName == "<A>") {
         output = processANode(rootNode, output);
@@ -70,7 +70,7 @@ else if (rootNode->nodeName == "<E>") {
         string tOutput = "";
         output += processTNode(rootNode->subTrees[6]->subTrees[0], tOutput);
 
-        output += gotoString + ": " ;
+        output += gotoString + ": NOOP\n" ;
     }
     else if (rootNode->nodeName == "<G>") {
 
@@ -84,7 +84,7 @@ else if (rootNode->nodeName == "<E>") {
         output += processTNode(rootNode->subTrees[6]->subTrees[0], tOutput);
 
         output += "BR " + backString + "\n";
-        output += gotoString + ": ";
+        output += gotoString + ": NOOP\n";
 
 }
         return output;
@@ -106,27 +106,28 @@ string Compile::processANode(Node* rootNode, string output) {
 }
 string Compile::processWNode(Node* rootNode, string output) {
     if (rootNode->subTrees[1]->subTrees.size() > 1) {
-        output += "LOAD " + processMNode(rootNode->subTrees[1], output);
+        output += processMNode(rootNode->subTrees[1], output, "LOAD ");
         token token = token::ID_Token(createTemporaryVariable(), 0);
         symbolTable.push_back(token);
         output += "STORE T" + IntToString(tempVariableCount - 1) + "\n";
+        
         output += "WRITE T" + IntToString(tempVariableCount - 1) + "\n";
 
     }
-    else {
-        output += "WRITE " + processMNode(rootNode->subTrees[1], output);
+    else if (rootNode->subTrees[1]->subTrees.size() == 1) {
+        output += processMNode(rootNode->subTrees[1], output, "WRITE ");
     }
     return output;
 }
 string Compile::processINode(Node* rootNode, string output, string gotoString) {
     string leftMNode, rightMNode;
-    output += "LOAD " + processMNode(rootNode->subTrees[2], output);
+    output += processMNode(rootNode->subTrees[2], output, "LOAD ");
     token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenLeft);
     leftMNode = IntToString(tempVariableCount - 1);
     output += "STORE T" + leftMNode + "\n";
 
-    output += "LOAD " + processMNode(rootNode->subTrees[4], output);
+    output += processMNode(rootNode->subTrees[4], output, "LOAD ");
     token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenRight);
     rightMNode = IntToString(tempVariableCount - 1);
@@ -159,13 +160,13 @@ string Compile::processINode(Node* rootNode, string output, string gotoString) {
 string Compile::processGNode(Node* rootNode, string output, string gotoString) {
     string leftMNode, rightMNode;
     
-    output += "LOAD " + processMNode(rootNode->subTrees[2], output);
+    output += processMNode(rootNode->subTrees[2], output, "LOAD ");
     token tokenLeft = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenLeft);
     leftMNode = IntToString(tempVariableCount - 1);
     output += "STORE T" + leftMNode + "\n";
 
-    output += "LOAD " + processMNode(rootNode->subTrees[4], output);
+    output += processMNode(rootNode->subTrees[4], output, "LOAD ");
     token tokenRight = token::ID_Token(createTemporaryVariable(), 0);
     symbolTable.push_back(tokenRight);
     rightMNode = IntToString(tempVariableCount - 1);        
@@ -200,38 +201,52 @@ string Compile::processGNode(Node* rootNode, string output, string gotoString) {
 
     return output;
 }
-string Compile::processMNode(Node* rootNode, string output ) {
+string Compile::processMNode(Node* rootNode, string output, string assemblyCommand ) {
     bool ampFlag = false;
-    if (rootNode->subTrees.size() == 1) {
+    string ampString = "", tString = "";
 
-        if (rootNode->subTrees[0]->tk.tokenLiteral == "&") {
-            //do & math
-            //more if where rootNode->subTree[1]->subTrees0 == IDTK or NUMTK
-        }
-        else {
-          output = processHRnodes(rootNode->subTrees[0]->subTrees[0]->subTrees[0]->tk, ampFlag) + "\n";
-        }
+    if (rootNode->subTrees[0]->subTrees[0]->tk.tokenLiteral == "&") {
+        token tokenFirst = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(tokenFirst);
+
+        ampString += "STORE " + tokenFirst.tokenLiteral + "\n";
+        ampString += "LOAD " + processHRnodes(rootNode->subTrees[0]->subTrees[1]->subTrees[0]->tk, ampFlag) + "\n";
+        
+        token tokenSecond = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(tokenSecond);
+        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
+        string ampGoto = "AMP" + IntToString(conditionalCount++);
+        ampString += "BRPOS "  + ampGoto + "\n";
+        ampString += "MULT -1\n";
+        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
+        ampString += ampGoto + ": NOOP\n";
+        ampString += "LOAD " + tokenSecond.tokenLiteral + "\n";
+        output = tokenSecond.tokenLiteral + "\n";
     }
     else {
         output = processHRnodes(rootNode->subTrees[0]->subTrees[0]->subTrees[0]->tk, ampFlag) + "\n";
+    }
+
+    if (rootNode->subTrees.size() > 1) {
         switch (rootNode->subTrees[1]->tk.tokenLiteral[0]) {
         case '+':
-            output += "ADD " + processMNode(rootNode->subTrees[2], output);
+            output += processMNode(rootNode->subTrees[2], output, "ADD ");
             break;
         case '-':
-            output += "SUB " + processMNode(rootNode->subTrees[2], output);
+            output += processMNode(rootNode->subTrees[2], output, "SUB ");
             break;
         case '*':
-            output += "MULT " + processMNode(rootNode->subTrees[2], output);
+            output += processMNode(rootNode->subTrees[2], output, "MULT ");
             break;
         case '/':
-            output += "DIV " + processMNode(rootNode->subTrees[2], output);
+            output += processMNode(rootNode->subTrees[2], output, "DIV ");
             break;
         }
     }
-    return output;
+    return ampString + assemblyCommand + output;
 }
 string Compile::processHRnodes(token& tk, bool ampersandFlag) {
+
     if (tk.tokenID == "IDTK") {
         return tk.tokenLiteral;
     }
