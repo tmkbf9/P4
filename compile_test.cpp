@@ -283,7 +283,7 @@ void test_simplest_ampersand_use() {
     Compile compiler;
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
-    
+    cout << os.str() << endl;
     string assembly = "STORE T0\nLOAD 76\nSTORE T1\nBRPOS AMP1\nMULT -1\nSTORE T1\nAMP1: NOOP\nLOAD T1\nWRITE T1\nSTOP\nT0 0\nT1 0\n";
     assert(os.str() == assembly);
 }
@@ -298,7 +298,7 @@ void test_ampersand_then_number_use() {
     Compile compiler;
 
     compiler.compile(sem.semantics(parser.parse(scanner), cerr), os);
-    
+    cout << os.str() << endl;
     string assembly = "STORE T0\nLOAD 76\nSTORE T1\nBRPOS AMP1\nMULT -1\nSTORE T1\nAMP1: NOOP\nLOAD T1\nLOAD T1\nADD 1\nSTORE T2\nWRITE T2\nSTOP\nT0 0\nT1 0\nT2 0\n";
     assert(os.str() == assembly);
 }

@@ -206,25 +206,15 @@ string Compile::processMNode(Node* rootNode, string output, string assemblyComma
     string ampString = "", tString = "";
 
     if (rootNode->subTrees[0]->subTrees[0]->tk.tokenLiteral == "&") {
-        token tokenFirst = token::ID_Token(createTemporaryVariable(), 0);
-        symbolTable.push_back(tokenFirst);
-
-        ampString += "STORE " + tokenFirst.tokenLiteral + "\n";
-        ampString += "LOAD " + processHRnodes(rootNode->subTrees[0]->subTrees[1]->subTrees[0]->tk, ampFlag) + "\n";
         
         token tokenSecond = token::ID_Token(createTemporaryVariable(), 0);
         symbolTable.push_back(tokenSecond);
-        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
-        string ampGoto = "AMP" + IntToString(conditionalCount++);
-        ampString += "BRPOS "  + ampGoto + "\n";
-        ampString += "MULT -1\n";
-        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
-        ampString += ampGoto + ": NOOP\n";
-        ampString += "LOAD " + tokenSecond.tokenLiteral + "\n";
-        output = tokenSecond.tokenLiteral + "\n";
-    }
+        //ampString += "STORE T" + IntToString(tempVariableCount - 1) + "\n";
+        ampString += processHRnodes(rootNode->subTrees[0], true, "LOAD ");
+            return ampString + assemblyCommand + "\n";
+        }
     else {
-        output = processHRnodes(rootNode->subTrees[0]->subTrees[0]->subTrees[0]->tk, ampFlag) + "\n";
+        output = processHRnodes(rootNode->subTrees[0], ampFlag, "") + "\n";
     }
 
     if (rootNode->subTrees.size() > 1) {
@@ -243,21 +233,29 @@ string Compile::processMNode(Node* rootNode, string output, string assemblyComma
             break;
         }
     }
-    return ampString + assemblyCommand + output;
+    return assemblyCommand + output;
 }
-string Compile::processHRnodes(token& tk, bool ampersandFlag) {
-
-    if (tk.tokenID == "IDTK") {
-        return tk.tokenLiteral;
+string Compile::processHRnodes(Node * rootNode, bool ampersandFlag, string assemblyCommand) {
+    string ampString, returnString;
+    if (ampersandFlag) {
+        token tokenSecond = token::ID_Token(createTemporaryVariable(), 0);
+        symbolTable.push_back(tokenSecond);
+        if (rootNode->subTrees[1]->subTrees[0]->tk.tokenID == "IDTK") {
+            returnString += "LOAD " + tokenSecond.tokenLiteral + "\n";
+        } else {
+            returnString += "LOAD " + rootNode->subTrees[1]->subTrees[0]->tk.tokenLiteral + "\n";
+        }
+        ampString += returnString;
+        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
+        string ampGoto = "AMP" + IntToString(conditionalCount++);
+        ampString += "BRPOS " + ampGoto + "\n";
+        ampString += "MULT -1\n";
+        ampString += "STORE " + tokenSecond.tokenLiteral + "\n";
+        ampString += ampGoto + ": NOOP\n";
+        ampString += "LOAD T" + IntToString(tempVariableCount - 2) +"\n";
+        return  ampString;
     }
-    else if (tk.tokenID == "NUMTK") {
-        return tk.tokenLiteral;
-        //token token = token::ID_Token(createTemporaryVariable(), tk.linenumber);
-        //symbolTable.push_back(token);
-
-        //return token.tokenLiteral;
-    }
-    return tk.tokenLiteral;
+        return assemblyCommand + rootNode->subTrees[0]->subTrees[0]->tk.tokenLiteral;
 }
 
 string Compile::createTemporaryVariable() {

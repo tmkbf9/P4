@@ -22,7 +22,7 @@ class Compile {
   std::string processWNode(Node* rootNode, std::string output);
   std::string processINode(Node* rootNode, std::string output, std::string gotoString);
   std::string processGNode(Node* rootNode, std::string output, std::string gotoString);
-  std::string processHRnodes(token& tk, bool ampersandFlag);
+  std::string processHRnodes(Node* rootNode, bool ampersandFlag, std::string assemblyCommand);
   std::string processMNode(Node * rootNode, std::string output, std::string assemblyCommand);
   std::vector<token> symbolTable;
   int tempVariableCount;
